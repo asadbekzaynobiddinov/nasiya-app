@@ -29,7 +29,6 @@ import { SelfGuard } from 'src/common/guard/self.guard';
 @Controller('store')
 export class StoreController {
   constructor(private readonly storesService: StoreService) {}
-
   @ApiOperation({
     summary: 'Create Store',
   })
@@ -148,6 +147,11 @@ export class StoreController {
   @Get('one-day-debts')
   getOneDebts(@UserID() id: string, @Query('date') date: Date) {
     return this.storesService.findStoreByDateOne(id, date);
+  }
+
+  @Get('payment-days')
+  paymentDays(@UserID() id: string) {
+    return this.storesService.paymentDays(id);
   }
 
   // @Get('total-debt')

@@ -97,6 +97,25 @@ export class StoreService {
     };
   }
 
+  async paymentDays(id: string) {
+    const dates = await this.repository
+      .createQueryBuilder('store')
+      .leftJoinAndSelect('store.debtors', 'debtor')
+      .leftJoinAndSelect('debtor.debts', 'debt')
+      .select('debt.next_payment_date')
+      .where('store.id = :id', { id })
+      .andWhere('debt.debt_status = :status', { status: 'active' })
+      .getRawMany();
+    const result = dates.map(
+      (date) => date.debt_next_payment_date.toISOString().split('T')[0],
+    );
+    return {
+      status_code: 200,
+      message: 'success',
+      dates: result,
+    };
+  }
+
   async findStoreByDateOne(
     id: string,
     datas: Date,

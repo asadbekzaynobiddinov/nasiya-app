@@ -53,6 +53,7 @@ export class AuthService {
     return {
       accessToken,
       refreshToken,
+      store: currentStore.data,
     };
   }
 
