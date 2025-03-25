@@ -4,6 +4,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
 import { AllExceptionsFilter } from '../infrastructure/lib/index';
+import * as cors from 'cors';
 
 export class Application {
   static async main(): Promise<void> {
@@ -36,6 +37,14 @@ export class Application {
       .build();
     const documentFactory = () => SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('api/docs', app, documentFactory);
+
+    app.use(
+      cors({
+        origin: '*',
+        methods: ['GET', 'POST', 'PUT', 'DELETE'],
+        allowedHeaders: ['Content-Type', 'Authorization'],
+      }),
+    );
 
     await app.listen(process.env.PORT ?? 3000);
   }
