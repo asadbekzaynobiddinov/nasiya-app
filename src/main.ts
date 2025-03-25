@@ -19,21 +19,17 @@ import { config } from './config';
   });
 
   try {
-    // DataSource ni ulash
     await dataSource.initialize();
     console.log('Database connection established.');
 
     const adminRepository = dataSource.getRepository(Admin);
 
-    // SuperAdmin va Admin foydalanuvchilarini qo'shish
     const superAdminUsername = 'superAdmin';
     const adminUsername = 'admin';
     const password = 'parol1234';
 
-    // Parolni hash qilish
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // SuperAdminni qo'shish (agar mavjud bo'lmasa)
     const superAdminExists = await adminRepository.findOneBy({
       username: superAdminUsername,
     });
@@ -50,7 +46,6 @@ import { config } from './config';
       console.log('SuperAdmin already exists.');
     }
 
-    // Adminni qo'shish (agar mavjud bo'lmasa)
     const adminExists = await adminRepository.findOneBy({
       username: adminUsername,
     });
@@ -69,7 +64,6 @@ import { config } from './config';
   } catch (error) {
     console.error('Error:', error);
   } finally {
-    // DataSource ulanishini yopish
     await dataSource.destroy();
     console.log('Database connection closed.');
   }
