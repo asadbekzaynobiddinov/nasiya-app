@@ -20,3 +20,5 @@ export class Admin extends BaseModel {
   })
   role: AdminRoles;
 }
+
+export { AdminRoles };
