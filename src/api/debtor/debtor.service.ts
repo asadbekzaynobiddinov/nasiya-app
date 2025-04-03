@@ -140,14 +140,14 @@ export class DebtorService extends BaseService<
     if (!debt) {
       return {
         status_code: 404,
-        message: 'debt not found',
+        message: 'debtor not found',
         data: {},
       };
     }
     await this.getRepository.delete(id);
     return {
       status_code: 200,
-      message: 'debt deleted sucsesfuly',
+      message: 'debttor deleted sucsesfuly',
       data: {},
     };
   }
