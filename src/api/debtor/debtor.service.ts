@@ -132,4 +132,23 @@ export class DebtorService extends BaseService<
       data: debtor,
     };
   }
+
+  async delete(
+    id: string,
+  ): Promise<{ status_code: number; message: string; data: any }> {
+    const debt = await this.getRepository.findOne({ where: { id } });
+    if (!debt) {
+      return {
+        status_code: 404,
+        message: 'debt not found',
+        data: {},
+      };
+    }
+    await this.getRepository.delete(id);
+    return {
+      status_code: 200,
+      message: 'debt deleted sucsesfuly',
+      data: {},
+    };
+  }
 }
