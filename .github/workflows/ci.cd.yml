@@ -39,6 +39,7 @@ jobs:
           echo "${{ secrets.KEY }}" > private_key.pem
           chmod 600 private_key.pem
           ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
+          export PATH=/home/bitnami/.nvm/versions/node/v23.10.0/bin:$PATH
           cd nasiya-app 
           npx pm2 delete Nasiya
           git pull origin main
@@ -46,3 +47,5 @@ jobs:
           pnpm i
           pnpm run build
           npx pm2 start dist/main.js --name Nasiya
+          EOF
+      
