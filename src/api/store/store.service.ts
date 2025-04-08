@@ -84,7 +84,11 @@ export class StoreService {
       })
       .getRawMany();
     if (!totalDebtSum || totalDebtSum.length === 0) {
-      throw new NotFoundException('not found!');
+      return {
+        status_code: 200,
+        message: 'success',
+        data: 0,
+      };
     }
     let totalOneMonthDebt = 0;
     totalDebtSum.forEach((element) => {

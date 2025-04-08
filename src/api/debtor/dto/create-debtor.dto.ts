@@ -54,4 +54,6 @@ export class CreateDebtorDto {
   @ArrayMaxSize(2)
   @ArrayMinSize(2)
   images: string[];
+
+  totalDebtSum?: number;
 }

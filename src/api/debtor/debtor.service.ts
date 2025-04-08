@@ -109,12 +109,23 @@ export class DebtorService extends BaseService<
   }> {
     const allDebtors = await this.getRepository.find(options);
 
+    const debtors = allDebtors.map((debtor) => {
+      const totalDebtSum = debtor.debts.reduce((acc, debt) => {
+        return acc + parseFloat(debt.debt_sum);
+      }, 0);
+      return {
+        ...debtor,
+        totalDebtSum,
+      };
+    });
+
     return {
       status_code: 200,
       message: 'success',
-      data: allDebtors,
+      data: debtors,
     };
   }
+
   async findOneById(
     id: string,
     options?: IFindOptions<DeepPartial<Debtor>>,
