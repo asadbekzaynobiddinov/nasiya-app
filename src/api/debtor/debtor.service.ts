@@ -92,13 +92,15 @@ export class DebtorService extends BaseService<
       await imageTransaction.release();
     }
 
-    delete newDebtor.images;
-    delete newDebtor.phone_numbers;
+    const thisDebtor = await this.getRepository.findOne({
+      where: { id: newDebtor.id },
+      relations: ['phone_numbers', 'images', 'debts'],
+    });
 
     return {
       status_code: 201,
       message: 'success',
-      data: newDebtor,
+      data: { ...thisDebtor, totalDebtSum: 0 },
     };
   }
 
