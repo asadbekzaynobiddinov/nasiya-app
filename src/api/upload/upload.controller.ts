@@ -70,10 +70,16 @@ export class UploadController {
     }),
   )
   uploadFiles(@UploadedFiles() files: Express.Multer.File[]) {
-    return files.map((file) => ({
+    const data = files.map((file) => ({
       originalname: file.originalname,
       filename: file.filename,
       path: `http://localhost:3000/static/${file.filename}`,
     }));
+
+    return {
+      status_code: 200,
+      message: 'success',
+      data,
+    };
   }
 }
