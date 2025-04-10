@@ -56,30 +56,34 @@ export class UploadController {
       fileFilter: (req, file, callback) => {
         const allowedExtensions = ['.jpg', '.jpeg', '.png', '.svg'];
         const fileExt = extname(file.originalname).toLowerCase();
-
-        if (!allowedExtensions.includes(fileExt)) {
-          return callback(
-            new BadRequestException(
+        try {
+          if (!allowedExtensions.includes(fileExt)) {
+            throw new BadRequestException(
               `Only JPEG, JPG, PNG, SVG formats can be uploaded`,
-            ),
-            false,
-          );
+            );
+          }
+          callback(null, true);
+        } catch (error) {
+          callback(error, false);
         }
-        callback(null, true);
       },
     }),
   )
   uploadFiles(@UploadedFiles() files: Express.Multer.File[]) {
-    const data = files.map((file) => ({
-      originalname: file.originalname,
-      filename: file.filename,
-      path: `http://localhost:3000/static/${file.filename}`,
-    }));
+    try {
+      const data = files.map((file) => ({
+        originalname: file.originalname,
+        filename: file.filename,
+        path: `http://localhost:3000/static/${file.filename}`,
+      }));
 
-    return {
-      status_code: 200,
-      message: 'success',
-      data,
-    };
+      return {
+        status_code: 200,
+        message: 'success',
+        data,
+      };
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 }
