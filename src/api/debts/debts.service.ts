@@ -50,10 +50,15 @@ export class DebtsService extends BaseService<DebtDto, DeepPartial<Debt>> {
 
       await queryRunner.commitTransaction();
 
+      const debt = await this.getRepository.findOne({
+        where: { id: newDebt.id },
+        relations: ['images'],
+      });
+
       return {
         status_code: 201,
         message: 'success',
-        data: newDebt,
+        data: debt,
       };
     } catch (error) {
       await queryRunner.rollbackTransaction();
