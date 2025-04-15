@@ -13,6 +13,7 @@ import {
   PhoneNumbersOfDebtorsRepository,
 } from '../../core/repository/index';
 import { IFindOptions } from 'src/infrastructure/lib/baseService/interface';
+import { BadGatewayException, NotFoundException } from '@nestjs/common';
 
 export class DebtorService extends BaseService<
   CreateDebtorDto,
@@ -143,6 +144,64 @@ export class DebtorService extends BaseService<
       status_code: 200,
       message: 'success',
       data: debtor,
+    };
+  }
+
+  async update(
+    id: string,
+    dto: any,
+  ): Promise<{ status_code: number; message: string; data: any }> {
+    const debtor = await this.getRepository.findOne({ where: { id } });
+    if (!debtor) {
+      throw new NotFoundException('Debtor not found');
+    }
+
+    const updateTransaction =
+      this.getRepository.manager.connection.createQueryRunner();
+
+    await updateTransaction.connect();
+    await updateTransaction.startTransaction();
+
+    try {
+      const { pictures, numbers, ...datas } = dto;
+
+      if (dto.numbers && dto.numbers.length != 0) {
+        for (const number of numbers) {
+          await this.phoneRepo.update(
+            { id: number.id },
+            { phone_number: number.phone_number },
+          );
+        }
+      }
+
+      if (dto.pictures && dto.pictures.length != 0) {
+        for (const img of pictures) {
+          await this.imagesRepo.update({ id: img.id }, { image: img.url });
+        }
+      }
+
+      await this.getRepository.update({ id }, { ...datas });
+
+      await updateTransaction.commitTransaction();
+    } catch (error) {
+      await updateTransaction.rollbackTransaction();
+      throw new BadGatewayException(error.message);
+    }
+
+    const updatedDebtor = await this.getRepository.findOne({
+      where: { id },
+      relations: ['phone_numbers', 'images', 'debts'],
+    });
+
+    const totalDebtSum = updatedDebtor.debts.reduce(
+      (acc, debt) => acc + parseFloat(debt.debt_sum),
+      0,
+    );
+
+    return {
+      status_code: 200,
+      message: 'success',
+      data: { ...updatedDebtor, totalDebtSum },
     };
   }
 
