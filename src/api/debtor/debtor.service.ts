@@ -112,8 +112,6 @@ export class DebtorService extends BaseService<
   }> {
     const allDebtors = await this.getRepository.find(options);
 
-    console.log(options);
-
     const debtors = allDebtors.map((debtor) => {
       const totalDebtSum = debtor.debts.reduce((acc, debt) => {
         return acc + parseFloat(debt.debt_sum);
@@ -143,10 +141,26 @@ export class DebtorService extends BaseService<
       where: { id, store: options.where },
       relations: ['phone_numbers', 'images', 'debts', 'debts.images'],
     });
+
+    if (!debtor) {
+      return {
+        status_code: 200,
+        message: 'success',
+        data: {},
+      };
+    }
+
+    const totalDebtSum = debtor.debts.reduce((acc, debt) => {
+      return acc + parseFloat(debt.debt_sum);
+    }, 0);
+
     return {
       status_code: 200,
       message: 'success',
-      data: debtor,
+      data: {
+        ...debtor,
+        totalDebtSum,
+      },
     };
   }
 
