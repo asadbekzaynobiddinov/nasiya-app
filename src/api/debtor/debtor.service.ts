@@ -141,6 +141,7 @@ export class DebtorService extends BaseService<
   }> {
     const debtor = await this.getRepository.findOne({
       where: { id, store: options.where },
+      relations: ['phone_numbers', 'images', 'debts', 'debts.images'],
     });
     return {
       status_code: 200,
@@ -192,7 +193,7 @@ export class DebtorService extends BaseService<
 
     const updatedDebtor = await this.getRepository.findOne({
       where: { id },
-      relations: ['phone_numbers', 'images', 'debts'],
+      relations: ['phone_numbers', 'images', 'debts', 'debts.images'],
     });
 
     const totalDebtSum = updatedDebtor.debts.reduce(
