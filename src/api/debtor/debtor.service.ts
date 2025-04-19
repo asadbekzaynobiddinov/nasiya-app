@@ -95,7 +95,7 @@ export class DebtorService extends BaseService<
 
     const thisDebtor = await this.getRepository.findOne({
       where: { id: newDebtor.id },
-      relations: ['phone_numbers', 'images', 'debts'],
+      relations: ['phone_numbers', 'images', 'debts', 'debts.images'],
     });
 
     return {
@@ -111,6 +111,8 @@ export class DebtorService extends BaseService<
     data: DeepPartial<Debtor>[];
   }> {
     const allDebtors = await this.getRepository.find(options);
+
+    console.log(options);
 
     const debtors = allDebtors.map((debtor) => {
       const totalDebtSum = debtor.debts.reduce((acc, debt) => {

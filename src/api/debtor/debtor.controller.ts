@@ -78,7 +78,7 @@ export class DebtorController {
         },
         take: query.take,
         skip: query.skip,
-        relations: ['phone_numbers', 'images', 'debts'],
+        relations: ['phone_numbers', 'images', 'debts', 'debts.images'],
       });
     } catch (error) {
       throw Error(error.message);
