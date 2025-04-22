@@ -63,7 +63,11 @@ export class PaymentService extends BaseService<
         debt_sum: currentDebt.data.debt_sum - forMonthPayment.sum,
         debt_period: currentDebt.data.debt_period,
       });
-      return newPayment;
+      return {
+        status_code: 200,
+        message: 'success',
+        data: newPayment,
+      };
     } catch (error) {
       console.log(error);
 
