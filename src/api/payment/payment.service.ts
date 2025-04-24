@@ -98,20 +98,29 @@ export class PaymentService extends BaseService<
     try {
       const newPayment = this.getRepository.create(dto);
 
+      let totalPayment = newPayment.sum;
+      if (currentDebt.data.remaining_amount) {
+        totalPayment += +currentDebt.data.remaining_amount;
+        currentDebt.data.remaining_amount = null;
+      }
+
       const monthlyPayment =
-        currentDebt.data.debt_sum / currentDebt.data.debt_period;
-      const monthsPaid = Math.floor(newPayment.sum / monthlyPayment);
+        currentDebt.data.total_debt_sum / currentDebt.data.total_month;
+
+      const monthsPaid = Math.floor(totalPayment / monthlyPayment);
+      const remainder = totalPayment % monthlyPayment;
 
       let nextPaymentDate = new Date(
         currentDebt.data.next_payment_date as string,
       );
 
-      if (+currentDebt.data.debt_sum <= newPayment.sum) {
+      if (+currentDebt.data.debt_sum <= totalPayment) {
         currentDebt.data.debt_sum = 0;
         currentDebt.data.debt_status = DebtStatus.CLOSED;
         currentDebt.data.debt_period = DebtPeriod.MONTH0;
+        currentDebt.data.remaining_amount = 0;
       } else {
-        currentDebt.data.debt_sum -= newPayment.sum;
+        currentDebt.data.debt_sum -= monthsPaid * monthlyPayment;
 
         if (monthsPaid > 0) {
           nextPaymentDate = addMonths(nextPaymentDate, monthsPaid);
@@ -120,6 +129,8 @@ export class PaymentService extends BaseService<
             .toISOString()
             .split('T')[0];
         }
+
+        currentDebt.data.remaining_amount = remainder;
       }
 
       await queryRunner.manager.save(newPayment);
@@ -131,6 +142,7 @@ export class PaymentService extends BaseService<
           debt_status: currentDebt.data.debt_status,
           debt_period: currentDebt.data.debt_period,
           next_payment_date: currentDebt.data.next_payment_date,
+          remaining_amount: currentDebt.data.remaining_amount,
         },
       );
 

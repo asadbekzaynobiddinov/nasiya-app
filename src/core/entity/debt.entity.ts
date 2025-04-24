@@ -39,4 +39,7 @@ export class Debt extends BaseModel {
 
   @OneToMany(() => ImagesOfDebts, (images) => images.debt)
   images: ImagesOfDebts[];
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  remaining_amount: number;
 }
