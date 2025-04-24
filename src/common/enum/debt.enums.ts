@@ -1,4 +1,5 @@
 export enum DebtPeriod {
+  MONTH0 = 0,
   MONTH1 = 1,
   MONTH2 = 2,
   MONTH3 = 3,

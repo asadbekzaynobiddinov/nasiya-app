@@ -11,7 +11,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DebtRepository, PaymentRepository } from 'src/core/repository';
 import { DebtsService } from '../debts/debts.service';
 import { addMonths } from 'date-fns';
-import { DebtStatus } from 'src/common/enum';
+import { DebtPeriod, DebtStatus } from 'src/common/enum';
 
 @Injectable()
 export class PaymentService extends BaseService<
@@ -109,6 +109,7 @@ export class PaymentService extends BaseService<
       if (+currentDebt.data.debt_sum <= newPayment.sum) {
         currentDebt.data.debt_sum = 0;
         currentDebt.data.debt_status = DebtStatus.CLOSED;
+        currentDebt.data.debt_period = DebtPeriod.MONTH0;
       } else {
         currentDebt.data.debt_sum -= newPayment.sum;
 
@@ -125,7 +126,12 @@ export class PaymentService extends BaseService<
       await queryRunner.manager.update(
         this.debtRepo.target,
         currentDebt.data.id,
-        currentDebt.data,
+        {
+          debt_sum: currentDebt.data.debt_sum,
+          debt_status: currentDebt.data.debt_status,
+          debt_period: currentDebt.data.debt_period,
+          next_payment_date: currentDebt.data.next_payment_date,
+        },
       );
 
       await queryRunner.commitTransaction();
