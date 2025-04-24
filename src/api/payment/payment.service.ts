@@ -32,47 +32,84 @@ export class PaymentService extends BaseService<
 
     await queryRunner.connect();
     await queryRunner.startTransaction();
+
     try {
-      // take month count by query
-      let monthCount: number;
-      if (typeof query.monthCount !== 'number') {
-        monthCount = +query.monthCount;
-      } else {
-        monthCount = query.monthCount;
-      }
+      // 1. Oylik sonini olish
+      const monthCount =
+        typeof query.monthCount === 'number'
+          ? query.monthCount
+          : +query.monthCount;
 
-      //save new payment
-      const newPayment = await this.getRepository.create(forMonthPayment);
-      await this.getRepository.save(newPayment);
-
-      // update debts' next payment date
+      // 2. Qarzni olish
       const currentDebt = await this.debtsService.findOneById(
         forMonthPayment.debtId,
       );
-      const currentDebtDate = currentDebt.data.next_payment_date
-        ? new Date(
-            currentDebt.data.next_payment_date as unknown as string | number,
-          )
-        : new Date();
-      currentDebtDate.setMonth(currentDebtDate.getMonth() + monthCount);
+      const debtData = currentDebt.data;
 
-      currentDebt.data.debt_period -= monthCount;
+      if (!debtData) {
+        throw new NotFoundException('Debt not found');
+      }
 
-      await this.debtsService.update(forMonthPayment.debtId, {
-        next_payment_date: currentDebtDate,
-        debt_sum: currentDebt.data.debt_sum - forMonthPayment.sum,
-        debt_period: currentDebt.data.debt_period,
+      // 3. Qarz yopilgan bo'lsa, to'xtatish
+      if (debtData.debt_status === DebtStatus.CLOSED) {
+        await queryRunner.rollbackTransaction();
+        return {
+          status_code: 200,
+          message: 'debt is closed',
+          data: [],
+        };
+      }
+
+      // 4. Yangi to‘lov yaratish
+      const newPayment = this.getRepository.create(forMonthPayment);
+
+      const monthlyPayment = debtData.total_debt_sum / debtData.total_month;
+      const totalPayment = monthlyPayment * monthCount;
+
+      // 5. Qarz summasi yetarli bo‘lsa, yopiladi
+      if (debtData.debt_sum <= totalPayment) {
+        debtData.debt_sum = 0;
+        debtData.debt_status = DebtStatus.CLOSED;
+        debtData.debt_period = DebtPeriod.MONTH0;
+        debtData.remaining_amount = 0;
+      } else {
+        // Aks holda qarz kamaytiriladi
+        debtData.debt_sum -= totalPayment;
+        debtData.debt_period -= monthCount;
+
+        const currentDate = debtData.next_payment_date
+          ? new Date(debtData.next_payment_date as string)
+          : new Date();
+        const nextPaymentDate = new Date(currentDate);
+        nextPaymentDate.setMonth(currentDate.getMonth() + monthCount);
+        debtData.next_payment_date = nextPaymentDate
+          .toISOString()
+          .split('T')[0];
+      }
+
+      newPayment.sum = totalPayment;
+
+      // 6. Saqlashlar
+      await queryRunner.manager.save(newPayment);
+      await queryRunner.manager.update(this.debtRepo.target, debtData.id, {
+        debt_sum: debtData.debt_sum,
+        debt_status: debtData.debt_status,
+        debt_period: debtData.debt_period,
+        next_payment_date: debtData.next_payment_date,
+        remaining_amount: debtData.remaining_amount || null,
       });
+
+      await queryRunner.commitTransaction();
+
       return {
         status_code: 200,
         message: 'success',
         data: newPayment,
       };
     } catch (error) {
-      console.log(error);
-
       await queryRunner.rollbackTransaction();
-      throw error;
+      console.error('Transaction Failed:', error);
+      throw new BadRequestException('Transaction Failed');
     } finally {
       await queryRunner.release();
     }
@@ -86,7 +123,11 @@ export class PaymentService extends BaseService<
     }
 
     if (currentDebt.data.debt_status === 'closed') {
-      throw new BadRequestException('Debt Is Closed');
+      return {
+        status_code: 200,
+        message: 'debt is closed',
+        data: [],
+      };
     }
 
     const queryRunner =

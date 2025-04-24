@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsNotEmpty, IsNumber, IsUUID } from 'class-validator';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsUUID,
+} from 'class-validator';
 import { PaymentType } from '../../../common/enum';
 
 export class CreatePaymentDto {
@@ -7,7 +13,7 @@ export class CreatePaymentDto {
     description: 'Payment amount',
     example: 150.25,
   })
-  @IsNotEmpty()
+  @IsOptional()
   @IsNumber({ maxDecimalPlaces: 2 })
   sum: number;
 
