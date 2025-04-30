@@ -1,6 +1,5 @@
-import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsString, IsUUID } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { MessageStatus } from '../../../common/enum/index';
 
 export class CreateMessagesDto {
   @ApiProperty({
@@ -10,18 +9,25 @@ export class CreateMessagesDto {
   @IsString()
   message: string;
 
-  @ApiProperty({
-    description: 'The status of the message',
-    enum: MessageStatus,
-    example: MessageStatus.SENT,
-  })
-  @IsEnum(MessageStatus)
-  status: MessageStatus;
-
   @ApiPropertyOptional({
     description: 'Optional store identifier',
     example: 'Store123',
   })
   @IsOptional()
-  store: string;
+  store_id: string;
+
+  @ApiProperty({
+    description: 'debter number',
+    example: '+998907875101',
+  })
+  @IsString()
+  phone_number: string;
+
+  @ApiProperty({
+    description: 'Debtor id',
+    example: '550e8400-e29b-41d4-a716-446655440000',
+  })
+  @IsString()
+  @IsUUID()
+  debtor_id: string;
 }

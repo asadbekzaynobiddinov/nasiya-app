@@ -29,6 +29,15 @@ import { SelfGuard } from 'src/common/guard/self.guard';
 @Controller('store')
 export class StoreController {
   constructor(private readonly storesService: StoreService) {}
+
+  @Get('version')
+  getVersion() {
+    return {
+      version: '1.0.0',
+      new_version_available: false,
+    };
+  }
+
   @ApiOperation({
     summary: 'Create Store',
   })

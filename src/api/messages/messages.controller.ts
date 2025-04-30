@@ -31,7 +31,7 @@ export class MessagesController {
   @ApiResponse({ status: 201, description: 'Message created successfully' })
   @ApiResponse({ status: 400, description: 'Invalid input' })
   create(@Body() createMessagesDto: CreateMessagesDto, @UserID() id: string) {
-    return this.messagesService.create({ ...createMessagesDto, store: id });
+    return this.messagesService.create({ ...createMessagesDto, store_id: id });
   }
 
   @Get()
