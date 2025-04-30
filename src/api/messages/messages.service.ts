@@ -1,3 +1,4 @@
+import { Cron } from '@nestjs/schedule';
 import { BaseService } from 'src/infrastructure/lib/baseService';
 import { CreateMessagesDto } from './dto/create-messages.dto';
 import { Messages } from 'src/core/entity';
@@ -9,6 +10,17 @@ import { MessageStatus } from 'src/common/enum';
 export class MessagesService extends BaseService<CreateMessagesDto, Messages> {
   constructor(@InjectRepository(Messages) repository: MessagesRepository) {
     super(repository);
+  }
+
+  @Cron('0 20 * * *', {
+    timeZone: 'Asia/Tashkent',
+  })
+  sendMessage() {
+    console.log('Cron ishladi');
+    /**
+     * Sends a message to debtors.
+     * This method is responsible for notifying debtors with relevant information.
+     */
   }
 
   async findAll(

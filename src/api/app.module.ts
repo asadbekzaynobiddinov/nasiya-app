@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ScheduleModule } from '@nestjs/schedule';
 import { config } from '../config/index';
 import { DebtsModule } from './debts/debts.module';
 import { StoreModule } from './store/store.module';
@@ -20,6 +21,7 @@ import { AuthGuard } from 'src/common/guard/jwt-auth.guard';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     ThrottlerModule.forRoot([
       {
         ttl: 60,
