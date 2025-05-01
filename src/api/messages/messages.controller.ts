@@ -85,4 +85,20 @@ export class MessagesController {
   delete(@Param('id', ParseUUIDPipe) id: string) {
     return this.messagesService.delete(id);
   }
+
+  @Get('debtors-messages/:id')
+  @ApiOperation({ summary: 'Retrieve debtor messages by ID' })
+  @ApiParam({
+    name: 'id',
+    description: 'UUID of the debtor',
+    example: '550e8400-e29b-41d4-a716-446655440000',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Debtor messages retrieved successfully',
+  })
+  @ApiResponse({ status: 404, description: 'Debtor messages not found' })
+  debtorsMessages(@Param('id', ParseUUIDPipe) id: string) {
+    return this.messagesService.debtorsMessages(id);
+  }
 }

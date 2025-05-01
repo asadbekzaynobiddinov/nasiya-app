@@ -55,13 +55,27 @@ export class MessagesService extends BaseService<CreateMessagesDto, Messages> {
     **/
     await this.getRepository.save(newMessage);
 
+    const currentMessage = await this.getRepository.findOne({
+      where: { id: newMessage.id },
+      relations: ['debtor', 'debtor.phone_numbers'],
+    });
+
     return {
       status_code: 200,
       message: 'success',
-      data: {
-        ...newMessage,
-        phone_number: dto.phone_number,
-      },
+      data: currentMessage,
+    };
+  }
+
+  async debtorsMessages(id: string) {
+    const messages = await this.getRepository.find({
+      where: { debtor: { id } },
+      relations: ['debtor', 'debtor.phone_numbers'],
+    });
+    return {
+      status_code: 200,
+      messages: 'succes',
+      data: messages,
     };
   }
 }
