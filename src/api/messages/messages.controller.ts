@@ -38,7 +38,7 @@ export class MessagesController {
   @ApiOperation({ summary: 'Retrieve all messages' })
   @ApiResponse({ status: 200, description: 'List of all messages' })
   getAll(@UserID() id: string) {
-    return this.messagesService.findAll({ where: { store: { id } } });
+    return this.messagesService.chats(id);
   }
 
   @Get(':id')
@@ -100,5 +100,11 @@ export class MessagesController {
   @ApiResponse({ status: 404, description: 'Debtor messages not found' })
   debtorsMessages(@Param('id', ParseUUIDPipe) id: string) {
     return this.messagesService.debtorsMessages(id);
+  }
+
+  @Get()
+  getChats(@UserID() id: string) {
+    console.log(id);
+    return this.messagesService.chats(id);
   }
 }

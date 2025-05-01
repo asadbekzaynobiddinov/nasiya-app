@@ -4,7 +4,6 @@ import { CreateMessagesDto } from './dto/create-messages.dto';
 import { Messages } from 'src/core/entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MessagesRepository } from '../../core/repository/index';
-import { IFindOptions } from 'src/infrastructure/lib/baseService/interface';
 import { MessageStatus } from 'src/common/enum';
 
 export class MessagesService extends BaseService<CreateMessagesDto, Messages> {
@@ -21,17 +20,6 @@ export class MessagesService extends BaseService<CreateMessagesDto, Messages> {
      * Sends a message to debtors.
      * This method is responsible for notifying debtors with relevant information.
      */
-  }
-
-  async findAll(
-    options?: IFindOptions<Messages>,
-  ): Promise<{ status_code: number; message: string; data: Messages[] }> {
-    const allMessages = await this.getRepository.find(options);
-    return {
-      status_code: 200,
-      message: 'success',
-      data: allMessages,
-    };
   }
 
   async create(
@@ -77,5 +65,39 @@ export class MessagesService extends BaseService<CreateMessagesDto, Messages> {
       messages: 'succes',
       data: messages,
     };
+  }
+
+  async chats(storeId: string) {
+    try {
+      const messages = await this.getRepository
+        .createQueryBuilder('message')
+        .innerJoin(
+          (qb) => {
+            return qb
+              .select('MAX(sub."created_at")', 'maxcreated_at')
+              .addSelect('sub."debtorId"', 'debtorId')
+              .from(Messages, 'sub')
+              .where('sub."storeId" = :storeId', { storeId })
+              .groupBy('sub."debtorId"');
+          },
+          'latest',
+          `
+        latest."debtorId" = message."debtorId" 
+        AND latest."maxcreated_at" = message."created_at"
+      `,
+        )
+        .leftJoinAndSelect('message.debtor', 'debtor')
+        .leftJoinAndSelect('debtor.phone_numbers', 'phone_numbers')
+        .orderBy('message.created_at', 'DESC')
+        .getMany();
+
+      return {
+        status_code: 200,
+        message: 'success',
+        data: messages,
+      };
+    } catch (error) {
+      console.log(error.message);
+    }
   }
 }
