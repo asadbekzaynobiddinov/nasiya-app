@@ -4,6 +4,7 @@ import { Debtor } from './debtor.entity';
 import { SampleMessages } from './sample.message.entity';
 import { Messages } from './message.entity';
 import { Likes } from './likes.entity';
+import { Payments } from './payment.entity';
 
 @Entity({ name: 'stores' })
 export class Store extends BaseModel {
@@ -45,4 +46,7 @@ export class Store extends BaseModel {
 
   @OneToMany(() => Likes, (likes) => likes.store)
   likes: Likes[];
+
+  @OneToMany(() => Payments, (payment) => payment.store)
+  payments: Payments[];
 }

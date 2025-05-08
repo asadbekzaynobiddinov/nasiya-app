@@ -31,4 +31,7 @@ export class CreatePaymentDto {
   })
   @IsUUID()
   debtId: string;
+
+  @IsOptional()
+  storeId: string;
 }

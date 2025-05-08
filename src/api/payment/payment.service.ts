@@ -61,7 +61,11 @@ export class PaymentService extends BaseService<
       }
 
       // 4. Yangi to‘lov yaratish
-      const newPayment = this.getRepository.create(forMonthPayment);
+      const newPayment = this.getRepository.create({
+        ...forMonthPayment,
+        debt: { id: forMonthPayment.debtId },
+        store: { id: forMonthPayment.storeId },
+      });
 
       const monthlyPayment = debtData.total_debt_sum / debtData.total_month;
       const totalPayment = monthlyPayment * monthCount;
@@ -137,7 +141,11 @@ export class PaymentService extends BaseService<
     await queryRunner.startTransaction();
 
     try {
-      const newPayment = this.getRepository.create(dto);
+      const newPayment = this.getRepository.create({
+        ...dto,
+        debt: { id: dto.debtId },
+        store: { id: dto.storeId },
+      });
 
       let totalPayment = newPayment.sum;
       if (currentDebt.data.remaining_amount) {

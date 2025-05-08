@@ -19,6 +19,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { UserID } from 'src/common/decorator/user-id.decorator';
 
 @ApiBearerAuth()
 @ApiTags('Payment Api')
@@ -58,8 +59,11 @@ export class PaymentController {
     },
   })
   @Get()
-  findAll() {
-    return this.paymentService.findAll();
+  findAll(@UserID() id: string) {
+    return this.paymentService.findAll({
+      where: { store: { id } },
+      relations: ['debt.debtor'],
+    });
   }
 
   @ApiOperation({
@@ -174,14 +178,18 @@ export class PaymentController {
 
   @Post('for-month')
   async forMonth(
+    @UserID() storeId: string,
     @Body() forMonthPayment: CreatePaymentDto,
     @Query() query: any,
   ) {
-    return this.paymentService.forMonth(forMonthPayment, query);
+    return this.paymentService.forMonth({ ...forMonthPayment, storeId }, query);
   }
 
   @Post('for-any-sum')
-  async forAnySum(@Body() forAnySumPayment: CreatePaymentDto) {
-    return this.paymentService.forAnySum(forAnySumPayment);
+  async forAnySum(
+    @UserID() storeId: string,
+    @Body() forAnySumPayment: CreatePaymentDto,
+  ) {
+    return this.paymentService.forAnySum({ ...forAnySumPayment, storeId });
   }
 }
