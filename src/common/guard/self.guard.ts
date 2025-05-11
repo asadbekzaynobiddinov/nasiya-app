@@ -17,7 +17,7 @@ export class SelfGuard implements CanActivate {
     ) {
       return true;
     }
-    if (req.params.id !== req.user.id) {
+    if (req.params.id !== req.user.sub) {
       throw new ForbiddenException('Forbidden user');
     }
     return true;
