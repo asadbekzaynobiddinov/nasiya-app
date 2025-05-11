@@ -244,8 +244,26 @@ export class StoreService {
     message: string;
     data: Store;
   }> {
-    await this.findOne(id);
+    if (updateStoreDto.email) {
+      const storeEmail = await this.repository.findOne({
+        where: { email: updateStoreDto.email },
+      });
+      if (storeEmail) {
+        throw new BadRequestException('Email already exist!');
+      }
+    }
+
+    if (updateStoreDto.phone_number) {
+      const storePhone = await this.repository.findOne({
+        where: { phone_number: updateStoreDto.phone_number },
+      });
+      if (storePhone) {
+        throw new BadRequestException('Phone number already exist!');
+      }
+    }
+
     await this.repository.update(id, updateStoreDto);
+
     return this.findOne(id);
   }
 
