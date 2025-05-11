@@ -49,11 +49,14 @@ export class AuthService {
       expiresIn: config.REFRESH_TOKEN_TIME,
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { hashed_password, ...store } = currentStore.data;
+
     this.writeToCookie(refreshToken, res);
     return {
       accessToken,
       refreshToken,
-      store: currentStore.data,
+      store: store,
     };
   }
 
