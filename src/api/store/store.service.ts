@@ -262,6 +262,13 @@ export class StoreService {
       }
     }
 
+    if (updateStoreDto.hashed_password) {
+      const hashPassword = await this.manageBcrypt.createBcryptPassword(
+        updateStoreDto.hashed_password,
+      );
+      updateStoreDto.hashed_password = hashPassword;
+    }
+
     await this.repository.update(id, updateStoreDto);
 
     return this.findOne(id);
