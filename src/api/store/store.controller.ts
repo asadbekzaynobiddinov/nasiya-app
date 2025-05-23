@@ -34,7 +34,6 @@ export class StoreController {
   getVersion() {
     return {
       version: '1.0.0',
-      new_version_available: false,
     };
   }
 
